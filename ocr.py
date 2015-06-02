@@ -10,9 +10,9 @@ gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 bw = cv2.Canny(gray, 0, 50, 5);
 
 ## Show original image
-plt.imshow(img, interpolation='bicubic')
-plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-plt.show()
+#plt.imshow(img, interpolation='bicubic')
+#plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
+#plt.show()
 
 ## Show grayscale image
 #plt.imshow(gray, interpolation='bicubic')
@@ -42,25 +42,51 @@ for cnt in contours:
 #plt.show()
 
 ## Show isolated contours
-h,w,d = img.shape
-mask = np.zeros((h,w), np.uint8)
-cv2.drawContours(mask, hex, -1, 255, -1)
-crop = cv2.bitwise_and(img, img, mask=mask)
-plt.imshow(crop, interpolation='bicubic')
-plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-plt.show()
+#h,w,d = img.shape
+#mask = np.zeros((h,w), np.uint8)
+#cv2.drawContours(mask, hex, -1, 255, -1)
+#crop = cv2.bitwise_and(img, img, mask=mask)
+#plt.imshow(crop, interpolation='bicubic')
+#plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
+#plt.show()
 
+hexx = []
+
+# Process hexagons
 for cnt in hex:
+	# Build mask
 	h,w,d = img.shape
 	mask = np.zeros((h,w), np.uint8)
 	cv2.drawContours(mask, [cnt], 0, 255, -1)
 	crop = cv2.bitwise_and(img, img, mask=mask)
 
-	print(cv2.mean(img, mask))
+	shape_descriptor = {}
 
+	# OCR
 	crop_t = Image.fromarray(crop)
-	print(pytesseract.image_to_string(crop_t, config="-psm 10"))
+	shape_descriptor['text'] = pytesseract.image_to_string(crop_t, config="-psm 10")
 
-	plt.imshow(crop, interpolation='bicubic')
-	plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-	plt.show()
+	# determine team
+	mean_color = cv2.mean(img, mask)
+	if (mean_color[0] > mean_color[2]*1.5): # redder than it is blue
+		shape_descriptor['team'] = 'red'
+	elif (mean_color[2] > mean_color[0]*1.5): # bluer than it is red
+		shape_descriptor['team'] = 'blue'
+	else:
+		shape_descriptor['team'] = 'none'
+	
+	# determine if it is a capital
+	cropgray = cv2.cvtColor(crop, cv2.COLOR_RGB2GRAY)
+	num_white_pixels = np.sum(cropgray > 225)
+	shape_descriptor['capital'] = False
+	if (num_white_pixels > 500 and shape_descriptor['team'] != 'none'):
+		shape_descriptor['capital'] = True
+
+	# find center
+	m = cv2.moments(mask, True)
+	shape_descriptor['center'] = {'x': m['m10']/m['m00'], 'y': m['m01']/m['m00']}
+
+	print(shape_descriptor)
+	#plt.imshow(crop, interpolation='bicubic')
+	#plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
+	#plt.show()
