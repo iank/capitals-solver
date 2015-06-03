@@ -46,4 +46,32 @@ for tile in grid:
     if tile['team'] == 'none':
         letters.append(tile['letter'])
 
+with open("dict.txt") as f:
+    words = f.readlines()
+
+letter_count = {}
+for letter in letters:
+    if (letter in letter_count):
+        letter_count[letter] = letter_count[letter] + 1
+    else:
+        letter_count[letter] = 1
+
+possible_words = []
+for word in words:
+    ll = letter_count.copy()
+    x = list(word.rstrip())
+    impossible = 0
+    for letter in x:
+        if (letter not in ll):
+            impossible = 1
+        else:
+            if (ll[letter] <= 0):
+                impossible = 1
+            else:
+                ll[letter] = ll[letter] - 1
+    if (impossible == 0):
+        possible_words.append(word.rstrip())
+    
 print letters
+print letter_count
+print possible_words
