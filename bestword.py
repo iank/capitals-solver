@@ -43,9 +43,13 @@ grid = [
 {'i':-3,'j':2,'team':'none','letter':'o','capital':0},
 {'i':-1,'j':-1,'team':'blue','letter':'','capital':0}];
 
-def get_tile(eye, jay):
+MY_TEAM = 'red'
+ENEMY_TEAM = 'blue'
+
+def get_tile(coords):
+    # coords = (i,j)
     for tile in grid:
-        if (tile['i'] == eye and tile['j'] == jay):
+        if (tile['i'] == coords[0] and tile['j'] == coords[1]):
             return tile
 
 ## Determine available letters
@@ -114,23 +118,67 @@ if 1==1:
         # Second part: order doesn't matter
         if (len(candidate) == len(list(set(hashable))) and set(hashable) not in hashes):
             hashes.append(set(hashable))
-            solns.append({'word': word, 'tiles':candidate})
+            solns.append({'word': word, 'tiles':candidate, 'loc':hashable})
 
 ## Score each word
+adj = [(0,-1),(1,-1),(1,0),(0,1),(-1,1),(-1,0)]
 for candidate in solns:
     candidate['score'] = {
         'length': len(list(word)),
         'connected_length': 0,
         'mycapital_adjacent': 0,
         'enemycapital_adjacent': 0,
-        'blue_adjacent': 0,
+        'enemy_adjacent': 0,
     }
 
     # Determine connected length
-    # Start w/ all red tiles
-    #     Check 6 adjacent- if letter, 
-#    list = [tile in grid if tile['team'] == 'red']
-#    while (len(list) > 0):
-#        tile = list.pop(0)
-        
-    # pop(0) == unshift
+    # Start with all my tiles
+    check = [(tile['i'], tile['j']) for tile in grid if tile['team'] == MY_TEAM]
+    visited = []
+
+    # Find all tiles in my word connected to me
+    while (len(check) > 0):
+        c = check.pop(0)
+        tile = get_tile(c)
+        visited.append(c)
+
+        # Check six adjacent tiles
+        adjacent = [(c[0] + x[0], c[1] + x[1]) for x in adj]
+        for cc in adjacent:
+            nt = get_tile(cc)
+            if (nt == None):
+                continue
+
+            # letter tile not in list, but in word?
+            in_word = cc in candidate['loc']
+
+            if (cc in visited):
+                continue
+
+            if (nt['team'] == 'none' and in_word):
+                visited.append(cc)
+                candidate['score']['connected_length'] += 1
+                check.append(cc)
+
+pp.pprint(solns)
+
+
+
+
+
+
+#            # if adjacent tile is enemy and 'parent' tile is letter, then we are enemy-adjacent
+#            if (nt['team'] == ENEMY_TEAM and tile['team'] == 'none):
+#                visited.append(cc)
+#                candidate['score']['enemy_adjacent'] += 1
+#
+#            if (nt['team'] == ENEMY_TEAM and nt['capital'] == 1 and tile['team'] == 'none):
+#                visited.append(cc)
+#                candidate['score']['enemycapital_adjacent'] += 1
+#
+#            if (nt['team'] == ENEMY_TEAM and nt['capital'] == 1 and tile['team'] == 'none):
+#                visited.append(cc)
+#                candidate['score']['enemycapital_adjacent'] += 1
+#
+#       
+#    # pop(0) == unshift
