@@ -4,44 +4,44 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 grid = [
-{'i':0,'j':0,'team':'blue','letter':'','capital':0},
-{'i':1,'j':0,'team':'none','letter':'y','capital':0},
-{'i':0,'j':1,'team':'none','letter':'n','capital':0},
-{'i':-1,'j':1,'team':'none','letter':'e','capital':0},
-{'i':-1,'j':0,'team':'blue','letter':'','capital':0},
-{'i':0,'j':-1,'team':'blue','letter':'','capital':0},
-{'i':1,'j':-1,'team':'blue','letter':'','capital':0},
-{'i':0,'j':-2,'team':'blue','letter':'','capital':0},
-{'i':1,'j':-2,'team':'blue','letter':'','capital':0},
-{'i':2,'j':-2,'team':'none','letter':'u','capital':0},
-{'i':2,'j':-1,'team':'none','letter':'n','capital':0},
-{'i':2,'j':0,'team':'red','letter':'','capital':0},
-{'i':1,'j':1,'team':'red','letter':'','capital':0},
-{'i':0,'j':2,'team':'red','letter':'','capital':0},
-{'i':0,'j':3,'team':'none','letter':'m','capital':0},
-{'i':1,'j':2,'team':'none','letter':'g','capital':0},
-{'i':2,'j':1,'team':'red','letter':'','capital':1},
-{'i':2,'j':2,'team':'none','letter':'c','capital':0},
-{'i':3,'j':1,'team':'red','letter':'','capital':0},
-{'i':3,'j':0,'team':'red','letter':'','capital':0},
-{'i':3,'j':-1,'team':'none','letter':'r','capital':0},
-{'i':-1,'j':3,'team':'none','letter':'l','capital':0},
-{'i':-1,'j':2,'team':'none','letter':'f','capital':0},
-{'i':-2,'j':2,'team':'none','letter':'s','capital':0},
-{'i':-2,'j':1,'team':'blue','letter':'','capital':0},
-{'i':-2,'j':0,'team':'blue','letter':'','capital':0},
-{'i':-2,'j':-1,'team':'blue','letter':'','capital':1},
-{'i':-2,'j':-2,'team':'blue','letter':'','capital':0},
-{'i':-1,'j':-2,'team':'blue','letter':'','capital':0},
-{'i':0,'j':-3,'team':'blue','letter':'','capital':0},
-{'i':1,'j':-3,'team':'blue','letter':'','capital':0},
-{'i':2,'j':-4,'team':'none','letter':'a','capital':0},
-{'i':2,'j':-3,'team':'none','letter':'e','capital':0},
-{'i':-3,'j':-1,'team':'blue','letter':'','capital':0},
+{'i':-3,'j':-1,'team':'none','letter':'i','capital':0},
 {'i':-3,'j':0,'team':'blue','letter':'','capital':0},
-{'i':-3,'j':1,'team':'none','letter':'a','capital':0},
-{'i':-3,'j':2,'team':'none','letter':'o','capital':0},
-{'i':-1,'j':-1,'team':'blue','letter':'','capital':0}];
+{'i':-3,'j':1,'team':'none','letter':'e','capital':0},
+{'i':-3,'j':2,'team':'none','letter':'i','capital':0},
+{'i':-2,'j':-2,'team':'none','letter':'u','capital':0},
+{'i':-2,'j':-1,'team':'blue','letter':'','capital':1},
+{'i':-2,'j':0,'team':'none','letter':'i','capital':0},
+{'i':-2,'j':1,'team':'red','letter':'','capital':0},
+{'i':-2,'j':2,'team':'none','letter':'e','capital':0},
+{'i':-1,'j':-2,'team':'blue','letter':'','capital':0},
+{'i':-1,'j':-1,'team':'blue','letter':'','capital':0},
+{'i':-1,'j':0,'team':'none','letter':'f','capital':0},
+{'i':-1,'j':1,'team':'none','letter':'t','capital':0},
+{'i':0,'j':-3,'team':'blue','letter':'','capital':0},
+{'i':0,'j':-2,'team':'blue','letter':'','capital':0},
+{'i':0,'j':-1,'team':'blue','letter':'','capital':0},
+{'i':0,'j':0,'team':'none','letter':'u','capital':0},
+{'i':0,'j':1,'team':'none','letter':'c','capital':0},
+{'i':0,'j':2,'team':'none','letter':'r','capital':0},
+{'i':0,'j':3,'team':'none','letter':'r','capital':0},
+{'i':1,'j':-3,'team':'none','letter':'w','capital':0},
+{'i':1,'j':-2,'team':'blue','letter':'','capital':0},
+{'i':1,'j':-1,'team':'none','letter':'d','capital':0},
+{'i':1,'j':0,'team':'red','letter':'','capital':0},
+{'i':1,'j':1,'team':'red','letter':'','capital':0},
+{'i':1,'j':2,'team':'red','letter':'','capital':0},
+{'i':2,'j':-3,'team':'none','letter':'t','capital':0},
+{'i':2,'j':-2,'team':'none','letter':'e','capital':0},
+{'i':2,'j':-1,'team':'red','letter':'','capital':0},
+{'i':2,'j':0,'team':'red','letter':'','capital':0},
+{'i':2,'j':1,'team':'red','letter':'','capital':1},
+{'i':2,'j':2,'team':'none','letter':'g','capital':0},
+{'i':3,'j':-2,'team':'none','letter':'u','capital':0},
+{'i':3,'j':-1,'team':'none','letter':'o','capital':0},
+{'i':3,'j':0,'team':'none','letter':'x','capital':0},
+{'i':3,'j':1,'team':'red','letter':'','capital':0},
+]
+
 
 MY_TEAM = 'red'
 ENEMY_TEAM = 'blue'
@@ -180,10 +180,16 @@ for candidate in solns:
             visited.append(cc)
 
 ## Suggest good candidates:
-# TODO: suggest enemy capital adjacent words
 # TODO: better scoring, consider positions of connected tiles, etc
 
-ideas = [(x['word'], x['score']['connected_length'], x['score']['enemy_adjacent']) for x in solns]
-ideas = sorted(ideas, key=lambda x: x[1])
 
-pp.pprint(ideas)
+
+ideas = [(x['word'], x['score']['connected_length'], x['score']['enemy_adjacent'], x['score']['enemycapital_adjacent']) for x in solns]
+ideas = sorted(ideas, key=lambda x: x[1])
+pp.pprint(ideas[-10:])
+ideas = sorted(ideas, key=lambda x: x[2])
+pp.pprint(ideas[-10:])
+
+cap_adjacent = [(x['word'],x['score']['connected_length'],x['loc']) for x in solns if x['score']['enemycapital_adjacent'] > 0]
+cap_adjacent = sorted(cap_adjacent, key=lambda x: x[1])
+pp.pprint(cap_adjacent[-1:])

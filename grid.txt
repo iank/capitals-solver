@@ -37,3 +37,5 @@ i,j,team,letter,capital
 -3,1,none,a,0
 -3,2,none,o,0
 -1,-1,blue,,0
+
+:%s/\(.*\),\(.*\),\(.*\),\(.*\),\(.*\)$/{'i':\1,'j':\2,'team':'\3','letter':'\4','capital':\5},/g
