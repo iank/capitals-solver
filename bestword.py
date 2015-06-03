@@ -94,10 +94,8 @@ for k,word in enumerate(possible_words[:-1]):
 possible_words = list(set(possible_words) - set(redundant))
 
 ## Find tiles corresponding to each word- multiple permutations where possible
-solns = {}
-#for word in possible_words:
-word = possible_words[12]
-if 1==1:
+solns = []
+for word in possible_words:
     letters = list(word)
     ll = letter_count.copy()
     tiles = []
@@ -110,7 +108,6 @@ if 1==1:
     # letter 2 then letter 1, letter 1 twice, and letter 2 twice. But all are
     # equivalent for the game
     candidates = list(itertools.product(*tiles));
-    solns = []
     hashes = []
     for candidate in candidates:
         hashable = [(x['i'],x['j'])for x in candidate]
@@ -134,13 +131,13 @@ for candidate in solns:
     # Determine connected length
     # Start with all my tiles
     check = [(tile['i'], tile['j']) for tile in grid if tile['team'] == MY_TEAM]
-    visited = []
+    connected_loc = []
 
     # Find all tiles in my word connected to me
     while (len(check) > 0):
         c = check.pop(0)
         tile = get_tile(c)
-        visited.append(c)
+        connected_loc.append(c)
 
         # Check six adjacent tiles
         adjacent = [(c[0] + x[0], c[1] + x[1]) for x in adj]
@@ -152,33 +149,41 @@ for candidate in solns:
             # letter tile not in list, but in word?
             in_word = cc in candidate['loc']
 
-            if (cc in visited):
+            if (cc in connected_loc):
                 continue
 
             if (nt['team'] == 'none' and in_word):
-                visited.append(cc)
+                connected_loc.append(cc)
                 candidate['score']['connected_length'] += 1
                 check.append(cc)
 
-pp.pprint(solns)
+    # Now that we have all connected tiles in this word, check enemy adjacency
+    visited = []
+    for c in connected_loc:
+        # Check six adjacent tiles
+        adjacent = [(c[0] + x[0], c[1] + x[1]) for x in adj]
+        for cc in adjacent:
+            if cc in visited:
+                continue
 
+            nt = get_tile(cc)
+            if (nt == None):
+                continue
 
+            if (nt['team'] == ENEMY_TEAM):
+                candidate['score']['enemy_adjacent'] += 1
+            if (nt['team'] == ENEMY_TEAM and nt['capital'] == 1):
+                candidate['score']['enemycapital_adjacent'] += 1
+            if (nt['team'] == MY_TEAM and nt['capital'] == 1):
+                candidate['score']['mycapital_adjacent'] += 1
 
+            visited.append(cc)
 
+## Suggest good candidates:
+# TODO: suggest enemy capital adjacent words
+# TODO: better scoring, consider positions of connected tiles, etc
 
+ideas = [(x['word'], x['score']['connected_length'], x['score']['enemy_adjacent']) for x in solns]
+ideas = sorted(ideas, key=lambda x: x[1])
 
-#            # if adjacent tile is enemy and 'parent' tile is letter, then we are enemy-adjacent
-#            if (nt['team'] == ENEMY_TEAM and tile['team'] == 'none):
-#                visited.append(cc)
-#                candidate['score']['enemy_adjacent'] += 1
-#
-#            if (nt['team'] == ENEMY_TEAM and nt['capital'] == 1 and tile['team'] == 'none):
-#                visited.append(cc)
-#                candidate['score']['enemycapital_adjacent'] += 1
-#
-#            if (nt['team'] == ENEMY_TEAM and nt['capital'] == 1 and tile['team'] == 'none):
-#                visited.append(cc)
-#                candidate['score']['enemycapital_adjacent'] += 1
-#
-#       
-#    # pop(0) == unshift
+pp.pprint(ideas)
