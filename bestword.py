@@ -46,15 +46,16 @@ for tile in grid:
     if tile['team'] == 'none':
         letters.append(tile['letter'])
 
-with open("dict.txt") as f:
-    words = f.readlines()
-
 letter_count = {}
 for letter in letters:
     if (letter in letter_count):
         letter_count[letter] = letter_count[letter] + 1
     else:
         letter_count[letter] = 1
+
+## Determine all possible words
+with open("dict.txt") as f:
+    words = f.readlines()
 
 possible_words = []
 for word in words:
@@ -71,7 +72,15 @@ for word in words:
                 ll[letter] = ll[letter] - 1
     if (impossible == 0):
         possible_words.append(word.rstrip())
-    
-print letters
-print letter_count
+
+## Eliminate prefixes (assume sorted dictionary)
+redundant = []
+for k,word in enumerate(possible_words[:-1]):
+    if possible_words[k+1].startswith(word):
+        redundant.append(word)
+
+possible_words = list(set(possible_words) - set(redundant))
+ 
+#print letters
+#print letter_count
 print possible_words
