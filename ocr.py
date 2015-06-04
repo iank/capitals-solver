@@ -17,20 +17,11 @@ def decode_tiles(img):
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     bw = cv2.Canny(gray, 0, 50, 5);
 
-    ## Show original image
-    #plt.imshow(img, interpolation='bicubic')
-    #plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-    #plt.show()
-
-    ## Show grayscale image
-    #plt.imshow(gray, interpolation='bicubic')
-    #plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-    #plt.show()
-
-    ## Show black/white image
-    #plt.imshow(bw, interpolation='bicubic')
-    #plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-    #plt.show()
+    # HACK: some thresholds for hexagon recognition
+    h,w,d = img.shape
+    img_area = h*w
+    hex_area = img_area / 200
+    cap_area = img_area / 2000
 
     hex = []
 
@@ -39,7 +30,7 @@ def decode_tiles(img):
         cnt_len = cv2.arcLength(cnt, True)
         # Ramer-Douglas-Peucker algorithm
         cnt = cv2.approxPolyDP(cnt, 0.02*cnt_len, True)
-        if len(cnt) == 6 and cv2.contourArea(cnt) > 5000 and cv2.isContourConvex(cnt):
+        if len(cnt) == 6 and cv2.contourArea(cnt) > hex_area and cv2.isContourConvex(cnt):
             # TODO: detect angles
             hex.append(cnt)
 
@@ -80,8 +71,6 @@ def decode_tiles(img):
 
     s /= num_hex
 
-
-
     # Process hexagons
     for cnt in hex:
         # Build mask
@@ -98,11 +87,12 @@ def decode_tiles(img):
         shape_descriptor['letter'] = shape_descriptor['letter'].lower()
 
         # determine team
+        # recall OpenCV likes BGR
         mean_color = cv2.mean(img, mask)
-        if (mean_color[0] > mean_color[2]*1.5): # redder than it is blue
-            shape_descriptor['team'] = 'red'
-        elif (mean_color[2] > mean_color[0]*1.5): # bluer than it is red
+        if (mean_color[0] > mean_color[2]*1.5): # much bluer than it is red
             shape_descriptor['team'] = 'blue'
+        elif (mean_color[2] > mean_color[0]*1.5): # much redder than it is blue
+            shape_descriptor['team'] = 'red'
         else:
             shape_descriptor['team'] = 'none'
         
@@ -110,7 +100,7 @@ def decode_tiles(img):
         cropgray = cv2.cvtColor(crop, cv2.COLOR_RGB2GRAY)
         num_white_pixels = np.sum(cropgray > 225)
         shape_descriptor['capital'] = 0
-        if (num_white_pixels > 500 and shape_descriptor['team'] != 'none'):
+        if (num_white_pixels > cap_area and shape_descriptor['team'] != 'none'):
             shape_descriptor['capital'] = 1
 
         # find center
