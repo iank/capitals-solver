@@ -25,7 +25,7 @@ solns = bestword.suggest_words(grid, MY_TEAM)
 no_capital_detected = 1
 remaining_enemy_tiles = 0
 for tile in grid:
-    if tile['capital'] == 1:
+    if tile['capital'] == 1 and tile['team'] == ENEMY_TEAM:
         no_capital_detected = 0
     if tile['team'] == ENEMY_TEAM:
         remaining_enemy_tiles += 1
@@ -43,6 +43,7 @@ cap_adjacent = [(x['score']['enemy_adjacent'],x['word'],x['tiles']) \
                 for x in solns if x['score']['enemycapital_adjacent'] > 0]
 cap_adjacent = sorted(cap_adjacent, key=lambda x: x[0], reverse=True)
 if len(cap_adjacent) > 0:
+    img = cv2.cvtColor(screenshot, cv2.COLOR_BGR2RGB)
     cv2.drawContours(img, [x['contour'] for x in cap_adjacent[0][2]], -1, (0, 255, 0), 3 )
     plt.imshow(img)
     plt.title(cap_adjacent[0][1])
