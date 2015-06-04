@@ -34,23 +34,7 @@ def decode_tiles(img):
             # TODO: detect angles
             hex.append(cnt)
 
-    ## Draw contour lines
-    #cv2.drawContours(img , hex, -1, (0, 255, 0), 3 )
-    #plt.imshow(img, interpolation='bicubic')
-    #plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-    #plt.show()
-
-    ## Show isolated contours
-    #plt.figure()
-    #h,w,d = img.shape
-    #mask = np.zeros((h,w), np.uint8)
-    #cv2.drawContours(mask, hex, -1, 255, -1)
-    #crop = cv2.bitwise_and(img, img, mask=mask)
-    #plt.imshow(crop, interpolation='bicubic')
-    #plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-    #plt.show()
-
-    hexx = []
+    grid = []
 
     # Pick (x0,y0) origin for relative hex grid (arbitrary)
     origin = get_center(hex[0], img)
@@ -110,11 +94,8 @@ def decode_tiles(img):
         shape_descriptor['i'] = hexgrid['i']
         shape_descriptor['j'] = hexgrid['j']
 
-        hexx.append(shape_descriptor)
-        #plt.imshow(crop, interpolation='bicubic')
-        #plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-        #plt.show()
-    return hexx
+        grid.append(shape_descriptor)
+    return grid
 
 def hexagonal_grid(center, origin, s):
     (x0,y0) = origin
