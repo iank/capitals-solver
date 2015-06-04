@@ -1,5 +1,5 @@
 # capitals-solver
-Process screenshots &amp; suggest moves for the iPhone game 'Capitals'
+Process screenshots &amp; suggest moves for the iPhone game ['Capitals'](https://itunes.apple.com/us/app/capitals-free-word-battle/id968456900)
 
 ## Usage
 
