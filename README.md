@@ -18,11 +18,11 @@ Process screenshots &amp; suggest moves for the iPhone game 'Capitals'
 
 ## Example
 
-![Example screenshot](example.png)
+![Example screenshot](example_small.png)
 
 ## TODO
 
-- fix RGB/BGR
+- reduce magic numbers in imaging code
 - strategy:
   - ensure self capital protected
   - don't bridge gap
