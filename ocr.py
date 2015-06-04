@@ -37,19 +37,20 @@ def decode_tiles(img):
 			hex.append(cnt)
 
 	## Draw contour lines
-	#cv2.drawContours(img , hex, -1, (0, 255, 0), 3 )
-	#plt.imshow(img, interpolation='bicubic')
-	#plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
+	cv2.drawContours(img , hex, -1, (0, 255, 0), 3 )
+	plt.imshow(img, interpolation='bicubic')
+	plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
 	#plt.show()
 
 	## Show isolated contours
-	#h,w,d = img.shape
-	#mask = np.zeros((h,w), np.uint8)
-	#cv2.drawContours(mask, hex, -1, 255, -1)
-	#crop = cv2.bitwise_and(img, img, mask=mask)
-	#plt.imshow(crop, interpolation='bicubic')
-	#plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-	#plt.show()
+	plt.figure()
+	h,w,d = img.shape
+	mask = np.zeros((h,w), np.uint8)
+	cv2.drawContours(mask, hex, -1, 255, -1)
+	crop = cv2.bitwise_and(img, img, mask=mask)
+	plt.imshow(crop, interpolation='bicubic')
+	plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
+	plt.show()
 
 	hexx = []
 
@@ -97,13 +98,31 @@ def decode_tiles(img):
 def hexagonal_grid(center):
 	orig_x = 374
 	orig_y = 854
-	s = 76
+	hy = 120
+	sx = 100
+	sy = 65
+
 	# Map to hexagonal coordinates
 	# I'm not proud of this
-	# TODO: at least compute 's' and origin from data..
-	eye = (center['x'] - orig_x)/(2/np.sqrt(2) * s)
-	jay = (center['y'] - orig_y + 2/np.sqrt(2)*s*eye)/(np.sqrt(3)*s)
-	return {'i': int(round(eye)), 'j': int(round(jay))}
+	coords = []
+	for eye in np.arange(-3,4):
+		for jay in np.arange(-3,4):
+#			y = orig_y + jay*(np.sqrt(3)*s) + eye*(2.0/np.sqrt(2)*s)
+#			x = orig_x + eye*(2.0/np.sqrt(2)*s)
+			y = orig_y + jay*hy + eye*sy
+			x = orig_x + eye*sx
+			coords.append((x,y,eye,jay))
+
+	min = (100000, 0, 0)
+	myx = center['x']
+	myy = center['y']
+	for c in coords:
+		dist = np.sqrt((myx - c[0])**2 + (myy - c[1])**2)
+		if dist < min[0]:
+			min = (dist, c[2], c[3])
+
+	return {'i': min[1], 'j': min[2]}
+
 
 screenshot = cv2.imread('ss.png', 1)
 shape_descriptors = decode_tiles(screenshot)
