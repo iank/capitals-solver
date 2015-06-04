@@ -5,6 +5,10 @@ Process screenshots &amp; suggest moves for the iPhone game 'Capitals'
 
     ./game.py example.png red
 
+## Example
+
+![Example screenshot](iank.github.com/capitals-solver/example.png)
+
 ## TODO
 
 - robustify hex coordinate conversion
