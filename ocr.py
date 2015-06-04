@@ -64,6 +64,24 @@ def decode_tiles(img):
     # Pick (x0,y0) origin for relative hex grid (arbitrary)
     origin = get_center(hex[0], img)
 
+    # Find side length s
+    num_hex = 0
+    s = 0
+    for cnt in hex:
+        ss = 0
+        for k in range(0,4):
+            ss += np.sqrt((cnt[k][0][0] - cnt[k+1][0][0])**2 + \
+                         (cnt[k][0][1] - cnt[k+1][0][1])**2)
+        # Sixth side
+        ss += np.sqrt((cnt[5][0][0] - cnt[0][0][0])**2 + \
+                         (cnt[5][0][1] - cnt[0][0][1])**2)
+        s += (ss / 6)
+        num_hex += 1
+
+    s /= num_hex
+
+
+
     # Process hexagons
     for cnt in hex:
         # Build mask
@@ -98,7 +116,7 @@ def decode_tiles(img):
         # find center
         (x0,y0) = get_center(cnt, img)
         center = {'x': x0, 'y': y0}
-        hexgrid = hexagonal_grid(center, origin)
+        hexgrid = hexagonal_grid(center, origin, s)
         shape_descriptor['i'] = hexgrid['i']
         shape_descriptor['j'] = hexgrid['j']
 
@@ -109,15 +127,14 @@ def decode_tiles(img):
     return hexx
 
 ## TODO: I can clean this up a lot
-##   - pick origin based on -any- hexagon,
-##     relative coords only need to be consistent between rounds
-##   - measure s from contour data
 ##   - inverse rect -> hex coords now that I have the correct derivation
-def hexagonal_grid(center, origin):
+def hexagonal_grid(center, origin, s):
     (x0,y0) = origin
-    hy = 120
-    sx = 100
-    sy = 65
+    s += 8  # FIXME
+    b = 20
+    hy = np.sqrt(3.)*s+b
+    sx = 1./2.*b+3./2.*s
+    sy = np.sqrt(3.)/2.*s + 1./2.*b
 
     # Map to hexagonal coordinates
     # I'm not proud of this
