@@ -62,10 +62,3 @@ Process screenshots &amp; suggest moves for the iPhone game ['Capitals'](https:/
     Game is winnable this turn: suggestions.png
     
 ![Extra turn suggestion](example/suggestion2.png)
-
-## TODO
-
-- robustify imaging code against device screen size / aspect ratio
-- strategy:
-  - ensure self capital protected
-  - don't bridge gap
