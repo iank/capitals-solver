@@ -22,7 +22,6 @@ Process screenshots &amp; suggest moves for the iPhone game 'Capitals'
 
 ## TODO
 
-- robustify hex coordinate conversion
 - fix RGB/BGR
 - strategy:
   - ensure self capital protected
