@@ -7,7 +7,7 @@ Process screenshots &amp; suggest moves for the iPhone game 'Capitals'
 
 ## Example
 
-![Example screenshot](iank.github.com/capitals-solver/example.png)
+![Example screenshot](http://iank.github.io/capitals-solver/example.png)
 
 ## TODO
 
