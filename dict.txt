@@ -4953,7 +4953,6 @@ fms
 fnma
 fnmas
 fortrans
-faberge
 fabian
 fabians
 facebook
@@ -14317,8 +14316,6 @@ templars
 tennessee
 tennessees
 tennyson
-tenochtitlan
-tenochtitlans
 teotihuacan
 teotihuacans
 terence
