@@ -39,7 +39,7 @@ def decode_tiles(img):
 	cv2.drawContours(img , hex, -1, (0, 255, 0), 3 )
 	plt.imshow(img, interpolation='bicubic')
 	plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-	#plt.show()
+	plt.show()
 
 	## Show isolated contours
 	plt.figure()
@@ -66,6 +66,7 @@ def decode_tiles(img):
 		# OCR
 		crop_t = Image.fromarray(crop)
 		shape_descriptor['letter'] = pytesseract.image_to_string(crop_t, config="-psm 10")
+                shape_descriptor['letter'] = shape_descriptor['letter'].lower()
 
 		# determine team
 		mean_color = cv2.mean(img, mask)
@@ -96,6 +97,11 @@ def decode_tiles(img):
 		#plt.show()
 	return hexx
 
+## TODO: I can clean this up a lot
+##   - pick origin based on -any- hexagon,
+##     relative coords only need to be consistent between rounds
+##   - measure s from contour data
+##   - inverse rect -> hex coords now that I have the correct derivation
 def hexagonal_grid(center):
 	orig_x = 374
 	orig_y = 854
@@ -123,7 +129,3 @@ def hexagonal_grid(center):
 			min = (dist, c[2], c[3])
 
 	return {'i': min[1], 'j': min[2]}
-
-
-screenshot = cv2.imread('ss.png', 1)
-grid = decode_tiles(screenshot)
