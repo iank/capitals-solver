@@ -5,6 +5,14 @@ from matplotlib import pyplot as plt
 import pytesseract
 import Image
 
+# Find the (x,y) centroid of a polygon (cnt) in img
+def get_center(cnt, img):
+    h,w,d = img.shape
+    mask = np.zeros((h,w), np.uint8)
+    cv2.drawContours(mask, [cnt], 0, 255, -1)
+    m = cv2.moments(mask, True)
+    return (m['m10']/m['m00'], m['m01']/m['m00'])
+        
 def decode_tiles(img):
 	gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 	bw = cv2.Canny(gray, 0, 50, 5);
@@ -36,24 +44,27 @@ def decode_tiles(img):
 			hex.append(cnt)
 
 	## Draw contour lines
-	cv2.drawContours(img , hex, -1, (0, 255, 0), 3 )
-	plt.imshow(img, interpolation='bicubic')
-	plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-	plt.show()
+	#cv2.drawContours(img , hex, -1, (0, 255, 0), 3 )
+	#plt.imshow(img, interpolation='bicubic')
+	#plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
+	#plt.show()
 
 	## Show isolated contours
-	plt.figure()
-	h,w,d = img.shape
-	mask = np.zeros((h,w), np.uint8)
-	cv2.drawContours(mask, hex, -1, 255, -1)
-	crop = cv2.bitwise_and(img, img, mask=mask)
-	plt.imshow(crop, interpolation='bicubic')
-	plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
-	plt.show()
+	#plt.figure()
+	#h,w,d = img.shape
+	#mask = np.zeros((h,w), np.uint8)
+	#cv2.drawContours(mask, hex, -1, 255, -1)
+	#crop = cv2.bitwise_and(img, img, mask=mask)
+	#plt.imshow(crop, interpolation='bicubic')
+	#plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
+	#plt.show()
 
 	hexx = []
 
 	# Process hexagons
+        # Pick (x0,y0) origin for relative hex grid (arbitrary)
+#        x0,y0 = get_center(hex[0])
+
 	for cnt in hex:
 		# Build mask
 		h,w,d = img.shape
@@ -85,8 +96,8 @@ def decode_tiles(img):
 			shape_descriptor['capital'] = 1
 
 		# find center
-		m = cv2.moments(mask, True)
-		center = {'x': m['m10']/m['m00'], 'y': m['m01']/m['m00']}
+                (x0,y0) = get_center(cnt, img)
+		center = {'x': x0, 'y': y0}
 		hexgrid = hexagonal_grid(center)
 		shape_descriptor['i'] = hexgrid['i']
 		shape_descriptor['j'] = hexgrid['j']
