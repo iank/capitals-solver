@@ -1,6 +1,8 @@
 # capitals-solver
 Process screenshots &amp; suggest moves for the iPhone game ['Capitals'](https://itunes.apple.com/us/app/capitals-free-word-battle/id968456900)
 
+See my [blog post](http://blog.iank.org/playing-capitals-with-opencv-and-python.html)
+
 ## Usage
 
     ./game.py example.png red
