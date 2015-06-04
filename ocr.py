@@ -5,7 +5,6 @@ from matplotlib import pyplot as plt
 import pytesseract
 import Image
 
-
 def decode_tiles(img):
 	gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 	bw = cv2.Canny(gray, 0, 50, 5);
@@ -66,7 +65,7 @@ def decode_tiles(img):
 
 		# OCR
 		crop_t = Image.fromarray(crop)
-		shape_descriptor['text'] = pytesseract.image_to_string(crop_t, config="-psm 10")
+		shape_descriptor['letter'] = pytesseract.image_to_string(crop_t, config="-psm 10")
 
 		# determine team
 		mean_color = cv2.mean(img, mask)
@@ -80,14 +79,16 @@ def decode_tiles(img):
 		# determine if it is a capital
 		cropgray = cv2.cvtColor(crop, cv2.COLOR_RGB2GRAY)
 		num_white_pixels = np.sum(cropgray > 225)
-		shape_descriptor['capital'] = False
+		shape_descriptor['capital'] = 0
 		if (num_white_pixels > 500 and shape_descriptor['team'] != 'none'):
-			shape_descriptor['capital'] = True
+			shape_descriptor['capital'] = 1
 
 		# find center
 		m = cv2.moments(mask, True)
-		shape_descriptor['center'] = {'x': m['m10']/m['m00'], 'y': m['m01']/m['m00']}
-		shape_descriptor['hexgrid'] = hexagonal_grid(shape_descriptor['center'])
+		center = {'x': m['m10']/m['m00'], 'y': m['m01']/m['m00']}
+		hexgrid = hexagonal_grid(center)
+		shape_descriptor['i'] = hexgrid['i']
+		shape_descriptor['j'] = hexgrid['j']
 
 		hexx.append(shape_descriptor)
 		#plt.imshow(crop, interpolation='bicubic')
@@ -125,5 +126,4 @@ def hexagonal_grid(center):
 
 
 screenshot = cv2.imread('ss.png', 1)
-shape_descriptors = decode_tiles(screenshot)
-print(shape_descriptors)
+grid = decode_tiles(screenshot)
