@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
 import pytesseract
 import Image
 
@@ -100,6 +99,8 @@ def decode_tiles(img):
         hexgrid = hexagonal_grid(center, origin, s)
         shape_descriptor['i'] = hexgrid['i']
         shape_descriptor['j'] = hexgrid['j']
+
+        shape_descriptor['contour'] = cnt
 
         grid.append(shape_descriptor)
     return grid
