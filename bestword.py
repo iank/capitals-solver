@@ -82,7 +82,7 @@ def suggest_words(grid, MY_TEAM):
     adj = [(0,-1),(1,-1),(1,0),(0,1),(-1,1),(-1,0)]
     for candidate in solns:
         candidate['score'] = {
-            'length': len(list(word)),
+            'length': len(list(candidate['word'])),
             'connected_length': 0,
             'mycapital_adjacent': 0,
             'enemycapital_adjacent': 0,
