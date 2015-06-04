@@ -18,6 +18,8 @@ Process screenshots &amp; suggest moves for the iPhone game 'Capitals'
 
 ## Examples
 
+### Basic word suggestion
+
 ![Example screenshot](example/img/example_small.png)
 
     # Find suggestions for blue player. Suggestions are sorted by possible
@@ -36,6 +38,8 @@ Process screenshots &amp; suggest moves for the iPhone game 'Capitals'
     word:       anorexic, territory gain    4, enemy territory loss    5
     word:          erica, territory gain    4, enemy territory loss    5
 
+### Vulnerable enemy capital
+
 ![Vulnerable capital](example/img/ss_small.png)
 
     # Taking the enemy capital grants an extra turn, and it is usually possible
@@ -47,22 +51,21 @@ Process screenshots &amp; suggest moves for the iPhone game 'Capitals'
 
 ![Vulnerable capital suggestion](example/suggestion1.png)
 
+### Extra turn / finishing move
+
 ![Extra turn](example/img/ss2_small.png)
 
     # This is the result of making the above suggested move. It is trivially
     # easy to finish off blue using the extra turn. My code recognizes that
     # the game is winnable and suggests the longest and shortest winning moves
     $ ./game.py example/ss2.png red
+    Game is winnable this turn: suggestions.png
     
-
 ![Extra turn suggestion](example/suggestion2.png)
 
 ## TODO
 
-- reduce magic numbers in imaging code
+- robustify imaging code against device screen size / aspect ratio
 - strategy:
   - ensure self capital protected
   - don't bridge gap
-- output presentation
-  - clean list, and/or:
-  - image w/ highlighted tiles
