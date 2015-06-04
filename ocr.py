@@ -14,6 +14,7 @@ def get_center(cnt, img):
     return (m['m10']/m['m00'], m['m01']/m['m00'])
         
 def decode_tiles(img):
+    # Greyscale and edge detection
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     bw = cv2.Canny(gray, 0, 50, 5);
 
@@ -25,21 +26,26 @@ def decode_tiles(img):
 
     hex = []
 
-    contours, hierarchy = cv2.findContours(bw, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    for cnt in contours:
-        cnt_len = cv2.arcLength(cnt, True)
-        # Ramer-Douglas-Peucker algorithm
-        cnt = cv2.approxPolyDP(cnt, 0.02*cnt_len, True)
-        if len(cnt) == 6 and cv2.contourArea(cnt) > hex_area and cv2.isContourConvex(cnt):
-            # TODO: detect angles
-            hex.append(cnt)
+    contours, hierarchy = cv2.findContours(
+        bw, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    grid = []
+    # Discard contours which don't seem like large-ish hexagons
+    for cnt in contours:
+        # Ramer-Douglas-Peucker algorithm
+        cnt_len = cv2.arcLength(cnt, True)
+        cnt = cv2.approxPolyDP(cnt, 0.02*cnt_len, True)
+
+        if (len(cnt) == 6 and \
+            cv2.contourArea(cnt) > hex_area and \
+            cv2.isContourConvex(cnt)):
+            # more robust: check angles for regularity ~ 120 deg.
+            # does not seem to be necessary
+            hex.append(cnt)
 
     # Pick (x0,y0) origin for relative hex grid (arbitrary)
     origin = get_center(hex[0], img)
 
-    # Find side length s
+    # Estimate side length s
     num_hex = 0
     s = 0
     for cnt in hex:
@@ -55,7 +61,8 @@ def decode_tiles(img):
 
     s /= num_hex
 
-    # Process hexagons
+    # Identify hexagons
+    grid = []
     for cnt in hex:
         # Build mask
         h,w,d = img.shape
@@ -97,6 +104,7 @@ def decode_tiles(img):
         grid.append(shape_descriptor)
     return grid
 
+# Translate rectangular coordinates to hexagonal coordinates (approx)
 def hexagonal_grid(center, origin, s):
     (x0,y0) = origin
     s += 8  # FIXME
@@ -105,7 +113,7 @@ def hexagonal_grid(center, origin, s):
     h = np.sqrt(3)*s
     r = h/2.
 
-    # Map to hexagonal coordinates
+    # Map to hexagonal coordinates (see hex_derivation.jpg)
     eye = (center['x'] - x0)/(s+1./2.*(b+s))
     jay = ((center['y'] - y0) - eye*(r+1./2.*b)) / (h+b)
 
