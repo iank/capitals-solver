@@ -126,33 +126,16 @@ def decode_tiles(img):
         #plt.show()
     return hexx
 
-## TODO: I can clean this up a lot
-##   - inverse rect -> hex coords now that I have the correct derivation
 def hexagonal_grid(center, origin, s):
     (x0,y0) = origin
     s += 8  # FIXME
     b = 20
-    hy = np.sqrt(3.)*s+b
-    sx = 1./2.*b+3./2.*s
-    sy = np.sqrt(3.)/2.*s + 1./2.*b
+
+    h = np.sqrt(3)*s
+    r = h/2.
 
     # Map to hexagonal coordinates
-    # I'm not proud of this
-    coords = []
-    for eye in np.arange(-8,8):
-        for jay in np.arange(-8,8):
-#            y = orig_y + jay*(np.sqrt(3)*s) + eye*(2.0/np.sqrt(2)*s)
-#            x = orig_x + eye*(2.0/np.sqrt(2)*s)
-            y = y0 + jay*hy + eye*sy
-            x = x0 + eye*sx
-            coords.append((x,y,eye,jay))
+    eye = (center['x'] - x0)/(s+1./2.*(b+s))
+    jay = ((center['y'] - y0) - eye*(r+1./2.*b)) / (h+b)
 
-    min = (100000, 0, 0)
-    myx = center['x']
-    myy = center['y']
-    for c in coords:
-        dist = np.sqrt((myx - c[0])**2 + (myy - c[1])**2)
-        if dist < min[0]:
-            min = (dist, c[2], c[3])
-
-    return {'i': min[1], 'j': min[2]}
+    return {'i': int(round(eye)), 'j': int(round(jay))}
