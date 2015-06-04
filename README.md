@@ -9,14 +9,15 @@ See my [blog post](http://blog.iank.org/playing-capitals-with-opencv-and-python.
 
 ## Dependencies
 
-- Ubuntu
-  - python
-  - tesseract-ocr
-  - python-opencv
-  - python-matplotlib (optional)
-  - [pytesseract](https://pypi.python.org/pypi/pytesseract/0.1)
-    - install python-pip
-    - `pip install pytesseract`
+- I developed this on OS X using homebrew.
+- I have also run it on Ubuntu 15.04 with the following packages
+    - python
+    - tesseract-ocr
+    - python-opencv
+    - python-matplotlib (optional)
+    - [pytesseract](https://pypi.python.org/pypi/pytesseract/0.1)
+        - install python-pip
+        - `pip install pytesseract`
 
 ## Examples
 
