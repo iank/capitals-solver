@@ -102,6 +102,7 @@ def suggest_words(grid, MY_TEAM):
         # Start with all my tiles
         check = [(tile['i'], tile['j']) for tile in grid if tile['team'] == MY_TEAM]
         connected_loc = []
+        enemy_adj = []
 
         # Find all tiles in my word connected to me
         while (len(check) > 0):
@@ -142,6 +143,7 @@ def suggest_words(grid, MY_TEAM):
 
                 if (nt['team'] == ENEMY_TEAM):
                     candidate['score']['enemy_adjacent'] += 1
+                    enemy_adj.append(cc)
                 if (nt['team'] == ENEMY_TEAM and nt['capital'] == 1):
                     candidate['score']['enemycapital_adjacent'] += 1
                 if (nt['team'] == MY_TEAM and nt['capital'] == 1):
@@ -149,6 +151,11 @@ def suggest_words(grid, MY_TEAM):
 
                 visited.append(cc)
 
+
+        candidate['connected_loc'] = connected_loc
+        candidate['enemy_adj'] = enemy_adj
+
     # TODO: better scoring, consider positions of connected tiles, etc
+    # TODO: distance from own capital, distance to enemy capital. per tile
 
     return solns
