@@ -13,15 +13,7 @@ def map_tiles(grid):
         mapping[(tile['i'], tile['j'])] = k
     return mapping
 
-def suggest_words(grid, MY_TEAM):
-    if (MY_TEAM == 'blue'):
-        ENEMY_TEAM = 'red'
-    else:
-        ENEMY_TEAM = 'blue'
-
-    ## Save time
-    mapping = map_tiles(grid)
-
+def count_letters(grid):
     ## Determine available letters
     letters = []
     for tile in grid:
@@ -35,10 +27,9 @@ def suggest_words(grid, MY_TEAM):
         else:
             letter_count[letter] = 1
 
-    ## Determine all possible words
-    with open("dict.txt") as f:
-        words = f.readlines()
+    return letter_count
 
+def find_possible_words(words, grid, letter_count):
     possible_words = []
     for word in words:
         ll = letter_count.copy()
@@ -62,8 +53,9 @@ def suggest_words(grid, MY_TEAM):
             redundant.append(word)
 
     possible_words = list(set(possible_words) - set(redundant))
+    return possible_words
 
-    ## Find tiles corresponding to each word- multiple permutations where possible
+def find_tiles(possible_words, grid, letter_count):
     solns = []
     for word in possible_words:
         letters = list(word)
@@ -86,72 +78,97 @@ def suggest_words(grid, MY_TEAM):
             if (len(candidate) == len(list(set(hashable))) and set(hashable) not in hashes):
                 hashes.append(set(hashable))
                 solns.append({'word': word, 'tiles':candidate, 'loc':hashable})
+    return solns
+
+def score_candidate(candidate, grid, MY_TEAM, ENEMY_TEAM, mapping, adj):
+    score = {
+        'length': len(list(candidate['word'])),
+        'connected_length': 0,
+        'mycapital_adjacent': 0,
+        'enemycapital_adjacent': 0,
+        'enemy_adjacent': 0,
+    }
+
+    # Determine connected length
+    # Start with all my tiles
+    check = [(tile['i'], tile['j']) for tile in grid if tile['team'] == MY_TEAM]
+    connected_loc = []
+    enemy_adj = []
+
+    # Find all tiles in my word connected to me
+    while (len(check) > 0):
+        c = check.pop(0)
+        tile = get_tile(grid, c, mapping)
+        connected_loc.append(c)
+
+        # Check six adjacent tiles
+        adjacent = [(c[0] + x[0], c[1] + x[1]) for x in adj]
+        for cc in adjacent:
+            nt = get_tile(grid, cc, mapping)
+            if (nt == None):
+                continue
+
+            # letter tile not in list, but in word?
+            in_word = cc in candidate['loc']
+
+            if (cc in connected_loc):
+                continue
+
+            if (nt['team'] == 'none' and in_word):
+                connected_loc.append(cc)
+                score['connected_length'] += 1
+                check.append(cc)
+
+    # Now that we have all connected tiles in this word, check enemy adjacency
+    visited = []
+    for c in connected_loc:
+        # Check six adjacent tiles
+        adjacent = [(c[0] + x[0], c[1] + x[1]) for x in adj]
+        for cc in adjacent:
+            if cc in visited:
+                continue
+
+            nt = get_tile(grid, cc, mapping)
+            if (nt == None):
+                continue
+
+            if (nt['team'] == ENEMY_TEAM):
+                score['enemy_adjacent'] += 1
+                enemy_adj.append(cc)
+            if (nt['team'] == ENEMY_TEAM and nt['capital'] == 1):
+                score['enemycapital_adjacent'] += 1
+            if (nt['team'] == MY_TEAM and nt['capital'] == 1):
+                score['mycapital_adjacent'] += 1
+
+            visited.append(cc)
+    return (score, connected_loc, enemy_adj)
+
+def suggest_words(grid, MY_TEAM):
+    if (MY_TEAM == 'blue'):
+        ENEMY_TEAM = 'red'
+    else:
+        ENEMY_TEAM = 'blue'
+
+    ## Save time
+    mapping = map_tiles(grid)
+
+    letter_count = count_letters(grid)
+
+    ## Determine all possible words
+    with open("dict.txt") as f:
+        words = f.readlines()
+
+    possible_words = find_possible_words(words, grid, letter_count)
+
+    ## Find tiles corresponding to each word- multiple permutations
+    ## where possible
+    solns = find_tiles(possible_words, grid, letter_count)
 
     ## Score each word
     adj = [(0,-1),(1,-1),(1,0),(0,1),(-1,1),(-1,0)]
     for candidate in solns:
-        candidate['score'] = {
-            'length': len(list(candidate['word'])),
-            'connected_length': 0,
-            'mycapital_adjacent': 0,
-            'enemycapital_adjacent': 0,
-            'enemy_adjacent': 0,
-        }
-
-        # Determine connected length
-        # Start with all my tiles
-        check = [(tile['i'], tile['j']) for tile in grid if tile['team'] == MY_TEAM]
-        connected_loc = []
-        enemy_adj = []
-
-        # Find all tiles in my word connected to me
-        while (len(check) > 0):
-            c = check.pop(0)
-            tile = get_tile(grid, c, mapping)
-            connected_loc.append(c)
-
-            # Check six adjacent tiles
-            adjacent = [(c[0] + x[0], c[1] + x[1]) for x in adj]
-            for cc in adjacent:
-                nt = get_tile(grid, cc, mapping)
-                if (nt == None):
-                    continue
-
-                # letter tile not in list, but in word?
-                in_word = cc in candidate['loc']
-
-                if (cc in connected_loc):
-                    continue
-
-                if (nt['team'] == 'none' and in_word):
-                    connected_loc.append(cc)
-                    candidate['score']['connected_length'] += 1
-                    check.append(cc)
-
-        # Now that we have all connected tiles in this word, check enemy adjacency
-        visited = []
-        for c in connected_loc:
-            # Check six adjacent tiles
-            adjacent = [(c[0] + x[0], c[1] + x[1]) for x in adj]
-            for cc in adjacent:
-                if cc in visited:
-                    continue
-
-                nt = get_tile(grid, cc, mapping)
-                if (nt == None):
-                    continue
-
-                if (nt['team'] == ENEMY_TEAM):
-                    candidate['score']['enemy_adjacent'] += 1
-                    enemy_adj.append(cc)
-                if (nt['team'] == ENEMY_TEAM and nt['capital'] == 1):
-                    candidate['score']['enemycapital_adjacent'] += 1
-                if (nt['team'] == MY_TEAM and nt['capital'] == 1):
-                    candidate['score']['mycapital_adjacent'] += 1
-
-                visited.append(cc)
-
-
+        candidate['score'], connected_loc, enemy_adj = \
+            score_candidate(candidate, grid, MY_TEAM, ENEMY_TEAM, mapping, adj)
         candidate['connected_loc'] = connected_loc
         candidate['enemy_adj'] = enemy_adj
 
