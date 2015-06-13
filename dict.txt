@@ -10257,7 +10257,6 @@ mozillas
 mr
 mrs
 ms
-mt
 muawiya
 muawiyas
 mubarak
@@ -14102,7 +14101,6 @@ szymborskas
 sèvres
 t
 tang
-ts
 tbs
 tkos
 tlcs
@@ -84675,7 +84673,6 @@ trysts
 trysted
 trysting
 trysts
-ts
 tsar
 tsars
 tsarina
