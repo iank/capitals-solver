@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import random
-import pprint
 import bestword
-import gc
-pp = pprint.PrettyPrinter(indent=2)
+import numpy as np
+
+#import pprint
+#pp = pprint.PrettyPrinter(indent=2)
 
 #gc.set_debug(gc.DEBUG_LEAK)
 
@@ -60,11 +61,24 @@ def gen_letter():
         ('z', .0007),
     ])
 
-def pick_move(solns, grid):
-    ideas = [(x['word'],x['score']['connected_length'],x['score']['enemy_adjacent'],x) for x in solns]
-    ideas = sorted(ideas, key=lambda x: x[2],reverse=True)
+def score_word_by_model(soln, model):
+    x = np.array([
+        soln['score']['length'],
+        soln['score']['connected_length'],
+        soln['score']['mycapital_adjacent'],
+        soln['score']['enemycapital_adjacent'],
+        soln['score']['enemy_adjacent']
+    ])
+    return np.sum(x*model)
+    
+
+def pick_move(solns, grid, model):
+    ideas = []
+    for soln in solns:
+        ideas.append((soln, score_word_by_model(soln, model)))
+
     ideas = sorted(ideas, key=lambda x: x[1],reverse=True)
-    return ideas[0][3]
+    return ideas[0][0]
 
 def initialize_grid():
     grid = []
@@ -203,15 +217,16 @@ def print_grid(grid):
     glyphs = [get_glyph(grid, x) for x in [(-2, 4),(0, 3),(2, 2)]]
     print(" %s %s %s" % tuple(glyphs))
 
-def capitals():
+def capitals(model1, model2, verbose=False):
     grid = initialize_grid()
-    #pp.pprint(grid)
-    print_grid(grid)
+    if (verbose):
+        print_grid(grid)
 
     round = 1
     winner = 'none'
     CURRENT_TEAM = 'red'
     extra_turn = 0
+    models = {'red':model1, 'blue':model2}
 
     while (winner == 'none' and round < 20):
         # create my capital if it doesn't exist
@@ -219,28 +234,22 @@ def capitals():
             my_tiles = get_owned_tiles(grid, CURRENT_TEAM)
             my_tiles[0]['capital'] = 1
             
-        print("getting moves")
-
         # Get possible moves
         solns = bestword.suggest_words(grid, CURRENT_TEAM)
 
-        print("picking move")
-
         # Pick best move
-        move = pick_move(solns,grid)
+        move = pick_move(solns,grid,models[CURRENT_TEAM])
         solns = []
-        print("%s team plays: [%s]" % (CURRENT_TEAM, move['word']))
+        if (verbose):
+            print("%s team plays: [%s]" % (CURRENT_TEAM, move['word']))
         do_move(grid, move, CURRENT_TEAM)
         move = []
-        print_grid(grid)
+        if (verbose):
+            print_grid(grid)
 
         round += 1
 
-        print("checking win")
-
         # Have we won?
-        print("  my tiles: %d" % len(get_owned_tiles(grid, CURRENT_TEAM)))
-        print(" ene tiles: %d" % len(get_owned_tiles(grid, other_team(CURRENT_TEAM))))
         if (len(get_owned_tiles(grid, other_team(CURRENT_TEAM))) == 0):
             winner = CURRENT_TEAM
             break
@@ -253,5 +262,4 @@ def capitals():
             CURRENT_TEAM = other_team(CURRENT_TEAM)
             extra_turn = 0
 
-if __name__ == '__main__':
-    capitals()
+    return winner
