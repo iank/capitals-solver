@@ -91,14 +91,14 @@ def score_candidate(candidate, grid, MY_TEAM, ENEMY_TEAM, mapping, adj):
 
     # Determine connected length
     # Start with all my tiles
-    check = [(tile['i'], tile['j']) for tile in grid if tile['team'] == MY_TEAM]
+    check = [tile for tile in grid if tile['team'] == MY_TEAM]
     connected_loc = []
     enemy_adj = []
 
     # Find all tiles in my word connected to me
     while (len(check) > 0):
-        c = check.pop(0)
-        tile = get_tile(grid, c, mapping)
+        tile = check.pop(0)
+        c = (tile['i'], tile['j'])
         connected_loc.append(c)
 
         # Check six adjacent tiles
@@ -117,7 +117,7 @@ def score_candidate(candidate, grid, MY_TEAM, ENEMY_TEAM, mapping, adj):
             if (nt['team'] == 'none' and in_word):
                 connected_loc.append(cc)
                 score['connected_length'] += 1
-                check.append(cc)
+                check.append(nt)
 
     # Now that we have all connected tiles in this word, check enemy adjacency
     visited = []

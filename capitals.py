@@ -2,9 +2,35 @@
 import random
 import pprint
 import bestword
+import gc
 pp = pprint.PrettyPrinter(indent=2)
 
+#gc.set_debug(gc.DEBUG_LEAK)
+
 adj = [(0,-1),(1,-1),(1,0),(0,1),(-1,1),(-1,0)]
+
+def oob(coord):
+    i,j = coord
+    # is tile out of bounds?
+    if (i < -3 or i > 3):
+        return True
+    if (i == -3 and (j < -1 or j > 4)):
+        return True
+    if (i == -2 and (j < -2 or j > 4)):
+        return True
+    if (i == -1 and (j < -2 or j > 3)):
+        return True
+    if (i ==  0 and (j < -3 or j > 3)):
+        return True
+    if (i ==  1 and (j < -3 or j > 2)):
+        return True
+    if (i ==  2 and (j < -4 or j > 2)):
+        return True
+    if (i ==  3 and (j < -4 or j > 1)):
+        return True
+
+    return False
+
 
 def other_team(team):
     if (team == 'red'):
@@ -34,8 +60,11 @@ def gen_letter():
         ('z', .0007),
     ])
 
-def pick_move(solns):
-    return solns[0]
+def pick_move(solns, grid):
+    ideas = [(x['word'],x['score']['connected_length'],x['score']['enemy_adjacent'],x) for x in solns]
+    ideas = sorted(ideas, key=lambda x: x[2],reverse=True)
+    ideas = sorted(ideas, key=lambda x: x[1],reverse=True)
+    return ideas[0][3]
 
 def initialize_grid():
     grid = []
@@ -121,16 +150,18 @@ def do_move(grid, move, team):
         tile = get_tile(grid, c)
         tile['team'] = team
         tile['letter'] = ''
+        tile['capital'] = 0
     # Second pass, a
     for c in move['enemy_adj']:
         tile = get_tile(grid, c)
         tile['team'] = 'none'
         tile['letter'] = gen_letter()
+        tile['capital'] = 0
     # Second pass, b
     for tile in get_owned_tiles(grid, team):
         for c in adj:
             cc = (tile['i'] + c[0], tile['j'] + c[1])
-            if (get_tile(grid, cc) == None):
+            if (get_tile(grid, cc) == None and not oob(cc)):
                 grid.append({
                     'team': 'none', 'letter': gen_letter(),
                     'i':cc[0],'j':cc[1], 'capital':0
@@ -172,37 +203,55 @@ def print_grid(grid):
     glyphs = [get_glyph(grid, x) for x in [(-2, 4),(0, 3),(2, 2)]]
     print(" %s %s %s" % tuple(glyphs))
 
-grid = initialize_grid()
-#pp.pprint(grid)
-print_grid(grid)
-
-round = 1
-winner = 'none'
-CURRENT_TEAM = 'red'
-
-while (winner == 'none' and round < 20):
-    # create my capital if it doesn't exist
-    if (get_capital(grid, CURRENT_TEAM) == None):
-        my_tiles = get_owned_tiles(grid, CURRENT_TEAM)
-        my_tiles[0]['capital'] = 1
-        
-    # Get possible moves
-    solns = bestword.suggest_words(grid, CURRENT_TEAM)
-
-    # Pick best move
-    move = pick_move(solns)
-    print("%s team plays: [%s]" % (CURRENT_TEAM, move['word']))
-    do_move(grid, move, CURRENT_TEAM)
+def capitals():
+    grid = initialize_grid()
+    #pp.pprint(grid)
     print_grid(grid)
 
-    round += 1
+    round = 1
+    winner = 'none'
+    CURRENT_TEAM = 'red'
+    extra_turn = 0
 
-    # Have we won?
-    if (len(get_owned_tiles(grid, other_team(CURRENT_TEAM))) == 0):
-        winner = CURRENT_TEAM
+    while (winner == 'none' and round < 20):
+        # create my capital if it doesn't exist
+        if (get_capital(grid, CURRENT_TEAM) == None):
+            my_tiles = get_owned_tiles(grid, CURRENT_TEAM)
+            my_tiles[0]['capital'] = 1
+            
+        print("getting moves")
 
-    # Did we get an extra turn?
-    if (get_capital(grid, other_team(CURRENT_TEAM)) == None):
-        pass
-    else:
-        CURRENT_TEAM = other_team(CURRENT_TEAM)
+        # Get possible moves
+        solns = bestword.suggest_words(grid, CURRENT_TEAM)
+
+        print("picking move")
+
+        # Pick best move
+        move = pick_move(solns,grid)
+        solns = []
+        print("%s team plays: [%s]" % (CURRENT_TEAM, move['word']))
+        do_move(grid, move, CURRENT_TEAM)
+        move = []
+        print_grid(grid)
+
+        round += 1
+
+        print("checking win")
+
+        # Have we won?
+        print("  my tiles: %d" % len(get_owned_tiles(grid, CURRENT_TEAM)))
+        print(" ene tiles: %d" % len(get_owned_tiles(grid, other_team(CURRENT_TEAM))))
+        if (len(get_owned_tiles(grid, other_team(CURRENT_TEAM))) == 0):
+            winner = CURRENT_TEAM
+            break
+
+        # Did we get an extra turn?
+        if (get_capital(grid, other_team(CURRENT_TEAM)) == None and extra_turn == 0):
+            extra_turn = 1
+            pass
+        else:
+            CURRENT_TEAM = other_team(CURRENT_TEAM)
+            extra_turn = 0
+
+if __name__ == '__main__':
+    capitals()
