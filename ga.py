@@ -2,6 +2,7 @@
 import capitals
 import numpy as np
 import random
+import time
 
 N_GENES = 5
 DF = 2
@@ -39,7 +40,7 @@ def breed(population, fitness):
     for i in range(1,len(newpop)):
         for k in range(0,len(newpop[i])):
             if (random.uniform(0,1) < 0.04):
-                newpop[i][k] += random.uniform(-1,1)
+                newpop[i][k] += random.uniform(-0.4,0.4)
 
     # Create remaining children randomly
     while (len(newpop) < len(population)):
@@ -71,13 +72,14 @@ def train_ga():
         # play each individual against every other individual 3 times
         # breed new population
 
-    N = 50
+    N = 40
     population = initialize_population(N)
 
-    games_per_generation = 3 * ((N-1)*(N) / 2)
+    games_per_generation = 4 * ((N-1)*(N) / 2)
     generation = 0
 
     while (1):
+        tic = time.time()
         generation += 1
         wins = np.array([0.]*N)
         losses = np.array([0.]*N)
@@ -85,7 +87,7 @@ def train_ga():
 
         game = 1
 
-        for q in range(1,4):    # three games each
+        for q in range(0,4):    # four games each
             for i in range(0,N):
                 for k in range(i+1,N):
                     result = capitals.capitals(population[i], population[k])
@@ -101,15 +103,21 @@ def train_ga():
                         losses[i] += 1
                     game += 1
 
-        fitness = wins + -1*ties + -2*losses
+        fitness = 3*wins + 1*ties # + 0*losses
 
         bidx = fitness.argmax()
         wr = wins[bidx] / (wins[bidx] + losses[bidx] + ties[bidx])
         lr = losses[bidx] / (wins[bidx] + losses[bidx] + ties[bidx])
         tr = ties[bidx] / (wins[bidx] + losses[bidx] + ties[bidx])
+
+        toc = time.time()
+        print("Elapsed: %d s" % int(toc-tic))
         print("Generation %d best individual %d fitness %d (w%.2f l%.2f t%.2f)" % \
             (generation, bidx, fitness[bidx], wr, lr, tr))
         print(population[bidx])
+        print("Entire population:")
+        for i,individual in enumerate(population):
+            print("    %s (%d)" % (individual, fitness[i]))
 
         population = breed(population, fitness)
 
