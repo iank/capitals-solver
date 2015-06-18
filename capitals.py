@@ -224,11 +224,11 @@ def capitals(model1, model2, verbose=False):
 
     round = 1
     winner = 'none'
-    CURRENT_TEAM = 'red'
+    CURRENT_TEAM = random.choice(["red","blue"])
     extra_turn = 0
     models = {'red':model1, 'blue':model2}
 
-    while (winner == 'none' and round < 20):
+    while (winner == 'none' and round < 30):
         # create my capital if it doesn't exist
         if (get_capital(grid, CURRENT_TEAM) == None):
             my_tiles = get_owned_tiles(grid, CURRENT_TEAM)
